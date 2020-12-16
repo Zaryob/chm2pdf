@@ -510,7 +510,7 @@ def convert_to_pdf(cfile, filename, outputfilename, options):
 
     # Stop here if '--extract-only' was given...
     if options['extract-only'] == '--extract-only':
-        return
+        exit()
 
     # ...otherwise continue with PDF generation.
 
