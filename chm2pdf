@@ -118,7 +118,7 @@ def get_objective_urls_list(filename):
     takes the list of files inside the chm archive, with the correct urls of each one.
     '''
 
-    os.system('enum_chmLib '+filename+' > '+CHM2PDF_WORK_DIR+'/urlslist.txt')
+    os.system('enum_chmLib \"' + filename.replace('"', '\\"') + '" > "'+CHM2PDF_WORK_DIR.replace('"', '\\"')+'/urlslist.txt"')
     if sys.version_info[0] == 2:
         flist=open(CHM2PDF_WORK_DIR+'/urlslist.txt','rU')
     else:
@@ -148,7 +148,7 @@ def correct_file(input_file, output_file, html_list, objective_urls, options):
 
     # Correct the HTML markup of the page, if the --beautifulsoup was passed.
     if options['beautifulsoup']=='--beautifulsoup':
-        from BeautifulSoup import BeautifulSoup, Tag
+        from bs4 import BeautifulSoup, Tag
         soup = BeautifulSoup(page)
         page = str(soup)
 
@@ -402,7 +402,7 @@ def convert_to_pdf(cfile, filename, outputfilename, options):
 
         if os.path.exists(page_filename) and (options['titlefile'] == '' or not options['titlefile'] in url):
             htmlout_filename=CHM2PDF_WORK_DIR+'/temp'+'%(#)04d' %{"#":c}+'.html'
-            htmlout_filename_list+=' '+ htmlout_filename
+            htmlout_filename_list+=' "'+ htmlout_filename.replace('"', '\\"')+'"'
             htmlout_filenames.append(htmlout_filename)
 
             if options['dontextract'] == '':
@@ -525,7 +525,7 @@ def convert_to_pdf(cfile, filename, outputfilename, options):
             if   key=='bodycolor': htmldoc_opts += ' --bodycolor ' + value
             elif key=='bodyfont': htmldoc_opts += ' --bodyfont ' + value
             elif key=='bodyimage': htmldoc_opts += ' --bodyimage ' + value
-            elif key=='book': htmldoc_opts += ' ' + value
+            elif key=='book':htmldoc_opts += ' ' + value + ' --webpage'
             elif key=='bottom': htmldoc_opts += ' --bottom ' + value
             elif key=='browserwidth': htmldoc_opts += ' --browserwidth ' + value
             elif key=='charset': htmldoc_opts += ' --charset ' + value
@@ -611,8 +611,7 @@ def convert_to_pdf(cfile, filename, outputfilename, options):
 
     if options['verbose']=='--verbose' and options['verbositylevel']=='high':
         print('htmldoc' + htmldoc_opts + ' ' + htmlout_filename_list + " -f "+ outputfilename + " > /dev/null")
-    exit_value=os.system ('htmldoc' + htmldoc_opts + ' ' + htmlout_filename_list + " -f "+ outputfilename + " > /dev/null")
-
+    exit_value=os.system ('htmldoc' + htmldoc_opts + ' ' + htmlout_filename_list + " -f \""+ outputfilename.replace('"', '\\"') + "\" > /dev/null")
     if exit_value != 0:
         print('Something wrong happened when launching htmldoc.')
         print('exit value: ',exit_value)
@@ -1108,8 +1107,8 @@ def main(argv):
     if options['dontextract'] == '':
         if options['verbose']=='--verbose' and options['verbositylevel']=='high':
             print('Removing any previous temporary files...')
-        os.system('rm -r '+CHM2PDF_ORIG_DIR+'/*')
-        os.system('rm -r '+CHM2PDF_WORK_DIR+'/*')
+        os.system('rm -r "'+CHM2PDF_ORIG_DIR.replace('"', '\\"')+'"')
+        os.system('rm -r "'+CHM2PDF_WORK_DIR.replace('"', '\\"')+'"')
 
     cfile = chm.CHMFile()
     cfile.LoadCHM(filename)
@@ -1120,9 +1119,9 @@ def main(argv):
             print('Will use the files in ' + CHM2PDF_ORIG_DIR + ' and ' + CHM2PDF_WORK_DIR + '.')
     else:
         if options['verbose'] == '--verbose' and options['verbositylevel'] == 'high':
-            os.system('extract_chmLib ' + filename + ' ' + CHM2PDF_ORIG_DIR)
+            os.system('extract_chmLib "' + filename.replace('"', '\\"') + '" "' + CHM2PDF_ORIG_DIR.replace('"', '\\"') + '"')
         else:
-            os.system('extract_chmLib ' + filename + ' ' + CHM2PDF_ORIG_DIR + '&> /dev/null')
+            os.system('extract_chmLib "' + filename.replace('"', '\\"') + '" "' + CHM2PDF_ORIG_DIR.replace('"', '\\"') + '" &> /dev/null')
 
     convert_to_pdf(cfile, filename, outputfilename, options)
 
